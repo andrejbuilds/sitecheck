@@ -1,70 +1,151 @@
-# sitecheck
+<div align="center">
 
-![Tests](https://github.com/AndrejcoT/sitecheck/actions/workflows/tests.yml/badge.svg)
+# Sitecheck
 
-`sitecheck` is a Python CLI pre-deployment checker for websites and WordPress projects.
+### A pre-deployment checker for websites and WordPress projects
 
-It scans a project folder and reports common deployment risks before a site is shipped. Results are returned as `PASS`, `WARN`, and `FAIL`, with both human-readable output and JSON output available. Text output can also be narrowed with `--only` or shortened with `--summary` when a quick terminal view is enough.
+Sitecheck scans a project folder and reports common risks before a website reaches production.
 
-## Why This Exists
+</div>
 
-Website deployments often rely on memory and manual checklists. `sitecheck` makes basic deployment hygiene repeatable by catching common issues such as debug settings, exposed development files, missing project files, and risky project-root artifacts.
+---
 
-It is also a practical DevOps learning project that can grow gradually without turning into a large platform too early.
+## About the project
 
-## What It Checks
+Sitecheck is a Python command-line tool that scans website project folders for common deployment risks.
 
-### Generic Checks
+Website deployments often depend on memory and manual checklists. Sitecheck makes part of that process repeatable by checking for issues such as exposed environment files, enabled WordPress debugging, risky project artifacts, missing files, and suspicious PHP indicators.
 
-| Check area | What it reviews |
-| --- | --- |
-| Path validation | Path exists and is a directory |
-| Git hygiene | Git repository, `.gitignore`, and `.env` handling |
-| Root risky files | Backup/archive files, public development files, database files, and `.htaccess` external redirects |
-| Dependency files | Composer and npm lockfile consistency |
-| Local artifacts | `node_modules`, editor directories, system files, debug/temp files, and error logs |
+Results are classified as `PASS`, `WARN`, or `FAIL` and can be displayed as readable terminal output or structured JSON.
 
-### WordPress Checks
+Sitecheck reports potential risks and indicators—it does not claim to prove that a website has been compromised.
 
-| Check area | What it reviews |
-| --- | --- |
-| WordPress structure | `wp-config.php`, `wp-content`, and partial WordPress detection |
-| Public WordPress files | `readme.html`, `xmlrpc.php`, `wp-config-sample.php`, `license.txt`, and install files |
-| Debug settings | `WP_DEBUG`, `WP_DEBUG_LOG`, `WP_DEBUG_DISPLAY`, `SCRIPT_DEBUG`, and `display_errors` |
-| Hardening settings | `DISALLOW_FILE_EDIT` and `WP_ENVIRONMENT_TYPE` |
-| Suspicious indicators | `wp-content/debug.log`, PHP files inside uploads, disguised PHP files in plugins, and suspicious PHP patterns in uploads |
-| Deep scan only | Unexpected PHP files directly inside `wp-content` and PHP files inside `wp-content/cache` |
+## Why I built it
 
-## Severity Rules
+The idea came from practical WordPress maintenance and deployment work.
 
-`sitecheck` uses a conservative severity model:
+Before publishing or migrating a website, developers often need to verify the same configuration, security, and project-hygiene details. Sitecheck explores how those repeated checks can be organized into a small, reusable command-line tool.
 
-| Status | Meaning |
-| --- | --- |
-| `PASS` | The check found no issue. |
-| `WARN` | A possible deployment risk was found, but deployment may still be possible. |
-| `FAIL` | A hard blocker was found, such as an invalid path or missing required project structure. |
+The project also gives me a practical way to learn foundational Python through a problem connected directly to my professional web development experience.
 
-Sitecheck reports indicators, not proof of compromise. It avoids wording such as "malware detected" because filenames and code patterns can have legitimate explanations.
+## Features
 
-## Usage
+■ Generic website and WordPress-specific checks <br>
+■ Automatic WordPress profile detection <br>
+■ Human-readable terminal output <br>
+■ Structured JSON output for automation <br>
+■ `PASS`, `WARN`, and `FAIL` severity levels <br>
+■ Overall deployment verdicts <br>
+■ Filtered output by result status <br>
+■ Compact summary output <br>
+■ Optional deeper WordPress scanning <br>
+■ Configurable ignored checks <br>
+■ Meaningful process exit codes <br>
+■ Automated test coverage with Pytest <br> 
+■ GitHub Actions testing on pushes and pull requests <br>
 
-Install locally in editable mode with development dependencies:
+## What Sitecheck reviews
+
+### Generic website checks
+
+| Area                 | What it reviews                                                              |
+| -------------------- | ---------------------------------------------------------------------------- |
+| **Path validation**  | Confirms that the supplied path exists and is a directory                    |
+| **Git hygiene**      | Checks for a Git repository, `.gitignore`, and exposed `.env` files          |
+| **Risky root files** | Reviews backup files, archives, database files, and public development files |
+| **Redirects**        | Reviews `.htaccess` for external redirects                                   |
+| **Dependencies**     | Checks Composer and npm package/lockfile consistency                         |
+| **Local artifacts**  | Detects `node_modules`, editor directories, and operating-system files       |
+| **Debug files**      | Reviews temporary files, debug artifacts, and error logs                     |
+
+### WordPress checks
+
+| Area                    | What it reviews                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| **WordPress structure** | Checks `wp-config.php`, `wp-content`, and partial WordPress installations                        |
+| **Public files**        | Reviews `readme.html`, `xmlrpc.php`, `license.txt`, sample configuration, and installation files |
+| **Debug settings**      | Checks `WP_DEBUG`, `WP_DEBUG_LOG`, `WP_DEBUG_DISPLAY`, `SCRIPT_DEBUG`, and `display_errors`      |
+| **Hardening**           | Reviews `DISALLOW_FILE_EDIT` and `WP_ENVIRONMENT_TYPE`                                           |
+| **Debug artifacts**     | Detects `wp-content/debug.log`                                                                   |
+| **PHP indicators**      | Reviews PHP files in uploads and disguised PHP files inside plugins                              |
+| **Suspicious patterns** | Reports potentially suspicious PHP patterns found in uploads                                     |
+| **Deep scanning**       | Optionally checks unexpected PHP files in `wp-content` and its cache directory                   |
+
+## Severity levels
+
+| Status | Meaning                                                           |
+| ------ | ----------------------------------------------------------------- |
+| `PASS` | The check found no issue                                          |
+| `WARN` | A possible risk was found and should be reviewed                  |
+| `FAIL` | A blocking issue prevents the project from being considered ready |
+
+Sitecheck also produces one overall verdict:
+
+| Verdict               | Meaning                                              |
+| --------------------- | ---------------------------------------------------- |
+| `ready`               | No warnings or failures were found                   |
+| `ready_with_warnings` | No failures were found, but some results need review |
+| `not_ready`           | One or more blocking failures were found             |
+
+Warnings are deliberately conservative. A suspicious filename or code pattern can have a legitimate explanation and should be reviewed manually.
+
+## Requirements
+
+* Python 3.11 or newer
+* pip
+
+Sitecheck has no external runtime dependencies.
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/andrejbuilds/sitecheck.git
+```
+
+Open the project directory:
+
+```bash
+cd sitecheck
+```
+
+Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```powershell
+.venv\Scripts\activate
+```
+
+Activate it on macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install Sitecheck with its development dependencies:
 
 ```bash
 python -m pip install -e ".[dev]"
 ```
 
-Show help:
-
-```bash
-sitecheck --help
-```
-
-Check the installed version:
+Confirm that it is installed:
 
 ```bash
 sitecheck --version
+```
+
+## Usage
+
+Display the available commands:
+
+```bash
+sitecheck --help
 ```
 
 Scan the current directory:
@@ -73,27 +154,43 @@ Scan the current directory:
 sitecheck scan .
 ```
 
-Run deeper, noisier WordPress checks:
+Scan another project:
+
+```bash
+sitecheck scan ./path-to-project
+```
+
+Run the optional deeper WordPress checks:
 
 ```bash
 sitecheck scan . --deep
 ```
 
-Show only one status in text output:
+Show only warnings:
 
 ```bash
 sitecheck scan . --only warn
 ```
 
-Show only the profile, verdict, summary counts, and verdict note:
+Show only failures:
+
+```bash
+sitecheck scan . --only fail
+```
+
+Display a compact summary:
 
 ```bash
 sitecheck scan . --summary
 ```
 
-## Output Modes
+Return the complete scan as JSON:
 
-Human-readable output is the default:
+```bash
+sitecheck scan . --json
+```
+
+## Example output
 
 ```text
 Detected profile: wordpress
@@ -112,21 +209,29 @@ FAIL: 0
 Review WARN items before deployment.
 ```
 
-Filter human-readable output by status:
+## Output options
+
+### Filter by status
+
+Use `--only` to display individual results with a particular status:
 
 ```bash
+sitecheck scan . --only pass
+sitecheck scan . --only warn
 sitecheck scan . --only fail
 ```
 
-`--only` does not change the scan result, summary counts, verdict, or exit code. It only hides non-matching individual result lines in text output.
+Filtering changes only what is displayed. The complete scan still runs, and the summary, verdict, and exit code remain unchanged.
 
-Use summary mode for a quick overview:
+### Summary mode
+
+Use `--summary` for a shorter terminal view:
 
 ```bash
 sitecheck scan . --summary
 ```
 
-Example summary output:
+Example:
 
 ```text
 Detected profile: generic
@@ -138,17 +243,15 @@ WARN: 0
 FAIL: 0
 ```
 
-`--summary` changes text output only. The full scan still runs, summary counts are unchanged, and the exit code still depends on whether any `FAIL` results exist.
+### JSON output
 
-JSON output is available for automation:
+Use `--json` to receive structured scan data:
 
 ```bash
 sitecheck scan . --json
 ```
 
-JSON output always returns the full scan data. Output display flags such as `--only` and `--summary` do not filter JSON results.
-
-Example JSON shape:
+Example structure:
 
 ```json
 {
@@ -164,44 +267,106 @@ Example JSON shape:
 }
 ```
 
+JSON mode always returns the complete scan data. Display options such as `--only` and `--summary` do not remove results from the JSON output.
+
 ## Configuration
 
-Ignore checks with `.sitecheck.toml` in the scanned project root:
+Create a `.sitecheck.toml` file in the root of the project being scanned to ignore checks that are not relevant to that project:
 
 ```toml
 [ignore]
 checks = ["xmlrpc", "node_modules"]
 ```
 
-Ignored checks are omitted from results and summary counts.
+Ignored checks are removed from the results and summary counts.
+
+Checks should be ignored intentionally. Hiding a warning does not resolve the underlying risk.
+
+## Exit codes
+
+Sitecheck returns process exit codes that can be used by scripts and automated workflows:
+
+| Code | Meaning                                                                 |
+| ---- | ----------------------------------------------------------------------- |
+| `0`  | The scan completed without any `FAIL` results                           |
+| `1`  | The command was invalid or the scan produced at least one `FAIL` result |
+
+Warnings do not produce a failing exit code.
 
 ## Testing
 
-Run tests:
+The project currently contains **152 passing tests** covering:
+
+* CLI commands and options
+* Scanner behavior
+* Profile detection
+* Generic website checks
+* WordPress-specific checks
+* Summary and verdict generation
+* Configuration and ignored checks
+* Text and JSON output
+* Exit-code behavior
+
+Run the complete test suite:
 
 ```bash
 python -m pytest
 ```
 
-On Windows/OneDrive setups where pytest temp folders can be locked, use a fresh local base temp directory:
+On Windows or OneDrive environments where temporary Pytest directories become locked, use a new temporary directory:
 
 ```powershell
 $stamp = Get-Date -Format 'yyyyMMddHHmmssfff'
 python -m pytest --basetemp ".pytest_tmp_$stamp"
 ```
 
-## Continuous Integration
+## Continuous integration
 
-GitHub Actions runs the test suite on push and pull request events.
+A basic GitHub Actions workflow installs the package and runs the Pytest suite on:
 
-## Project Status
+* Pushes
+* Pull requests
 
-This project is pre-release and intentionally small. The current focus is fast, low-noise deployment checks with optional deeper WordPress checks behind `--deep`. Recent work has focused on keeping scan data complete while making terminal output easier to control with `--only` and `--summary`.
+A failed test causes the workflow to fail, helping prevent broken changes from being merged unnoticed.
+
+## Development approach
+
+Sitecheck is an AI-assisted learning project combining my practical WordPress experience with foundational Python development.
+
+I defined the problem, project requirements, checks, expected behavior, and practical deployment risks based on real website work. AI coding tools assisted with implementation, debugging, testing, review, and documentation.
+
+I review the generated changes, run the test suite, verify behavior through practical scenarios, and refine the project incrementally.
+
+## Project status
+
+Sitecheck is an active, early-stage project that I continue developing during my free time.
+
+The core CLI, generic checks, WordPress profile, output formats, configuration, test suite, and continuous-integration workflow are operational. The current focus is improving documentation, message clarity, and practical usefulness while keeping scans fast and avoiding unnecessary noise.
+
+The project is currently pre-release and has not been published as a Python package.
 
 ## Roadmap
 
-- Improve WordPress profile detection further as real projects expose edge cases.
-- Expand configuration only where it reduces noise without hiding important failures.
-- Keep default scans fast and conservative.
-- Keep deeper or noisier checks behind explicit flags.
-- Keep text output useful for both detailed review and quick summaries.
+Planned improvements include:
+
+* Improving existing warning messages and recommendations
+* Adding more practical generic website checks
+* Strengthening WordPress hardening checks
+* Improving project documentation and examples
+* Adding regression tests for new behavior
+* Refining configuration without making it unnecessarily complex
+* Preparing the project for a possible future release
+
+Larger features will only be added when they solve a clear practical problem.
+
+## License
+
+Sitecheck is available under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+Built from real WordPress deployment experience, one practical check at a time.
+
+</div>
